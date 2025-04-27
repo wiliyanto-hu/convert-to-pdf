@@ -13,9 +13,17 @@ app.post('/convert-to-pdf', pdfUpload.single('file'), async (req, res) => {
     res.send('Invalid file');
     return;
   }
-
   const uploadFileName = req.file.filename;
   const fileNameWithoutExt = path.parse(req.file.filename).name;
+
+  const allowedExtensions = ['.docx', '.xlsx', '.pptx'];
+  const fileExtension = path.extname(uploadFileName).toLowerCase();
+  if (!allowedExtensions.includes(fileExtension)) {
+    res
+      .status(400)
+      .send(`Unsupported file type. Only ${allowedExtensions} are allowed`);
+    return;
+  }
 
   const pdfFileName = fileNameWithoutExt + '.pdf';
   try {
@@ -79,8 +87,7 @@ const removeFiles = async (
     });
   }
 };
-// TODO: 2. Handle invalid file
-// TODO: 3. Handle docker not run
+// TODO: 1. Check fake file (ex .exe uploaded as .docx)
 
 app.listen(serverPort, () => {
   console.log(`Listening on porte ${serverPort}`);
