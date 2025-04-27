@@ -15,8 +15,6 @@ app.post('/convert-to-pdf', pdfUpload.single('file'), async (req, res) => {
   }
 
   const uploadFileName = req.file.filename;
-  const UPLOAD_PATH = './uploads';
-  const PDF_PATH = `${UPLOAD_PATH}/converted`;
   const fileNameWithoutExt = path.parse(req.file.filename).name;
 
   const pdfFileName = fileNameWithoutExt + '.pdf';
@@ -26,23 +24,29 @@ app.post('/convert-to-pdf', pdfUpload.single('file'), async (req, res) => {
     const result = await execCommand(command);
     if (!result.success) {
       res.send('Failed to convert file');
+      return;
     }
 
     res.type('application/pdf');
     res.header('Content-Disposition', `attachment; filename=${pdfFileName}`);
-    res.download(`./uploads/converted/${pdfFileName}`, pdfFileName);
-  } catch (e) {
-    console.log(e);
+    res.download(`./uploads/converted/${pdfFileName}`, pdfFileName, (err) => {
+      if (err) {
+        console.log(err);
+        res.send('Failed to convert file');
+        removeFiles(uploadFileName, pdfFileName);
+
+        return;
+      }
+    });
+
+    res.on('finish', () => {
+      removeFiles(uploadFileName, pdfFileName);
+    });
+  } catch (err) {
+    console.log(err);
+    removeFiles(uploadFileName, pdfFileName);
     res.send('Failed to convert file');
   }
-  // finally {
-  //   fs.unlink(`${UPLOAD_PATH}/${uploadFileName}`, (err) => {
-  //     console.log(err);
-  //   });
-  //   fs.unlink(`${PDF_PATH}/${pdfFileName}`, (err) => {
-  //     console.log(err);
-  //   });
-  // }
 });
 
 const execCommand = async (
@@ -58,10 +62,25 @@ const execCommand = async (
     });
   });
 };
-// TODO: 1. Remove file after conversion
+
+const removeFiles = async (
+  uploadFileName: string,
+  pdfFileName: string
+): Promise<void> => {
+  const UPLOAD_PATH = './uploads';
+  const PDF_PATH = `${UPLOAD_PATH}/converted`;
+  console.log('CLEANING FILES');
+  fs.unlink(`${UPLOAD_PATH}/${uploadFileName}`, (err) => {
+    if (err) console.log(err);
+  });
+  if (pdfFileName) {
+    fs.unlink(`${PDF_PATH}/${pdfFileName}`, (err) => {
+      if (err) console.log(err);
+    });
+  }
+};
 // TODO: 2. Handle invalid file
 // TODO: 3. Handle docker not run
-// TODO: 3. Make exec a promise based function
 
 app.listen(serverPort, () => {
   console.log(`Listening on porte ${serverPort}`);
