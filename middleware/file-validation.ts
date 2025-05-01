@@ -2,6 +2,7 @@ import path from 'path';
 import { fileTypeFromStream } from 'file-type';
 import fs from 'fs';
 import { NextFunction, Request, Response } from 'express';
+import { removeFiles } from '../utils/fileManager';
 
 export const documentValidation = async (
   req: Request,
@@ -23,6 +24,7 @@ export const documentValidation = async (
     res
       .status(400)
       .send(`Unsupported file type. Only ${allowedExtensions} are allowed`);
+    removeFiles(uploadFileName);
     return;
   }
   next();
