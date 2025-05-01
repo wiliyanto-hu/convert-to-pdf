@@ -2,28 +2,12 @@ import { Request, Response } from 'express';
 import { execCommand } from '../utils/executeCommand';
 import { removeFiles } from '../utils/fileManager';
 import path from 'path';
-import { fileTypeFromStream } from 'file-type';
-import fs from 'fs';
 
 export const convertToPdf = async (req: Request, res: Response) => {
-  if (!req.file) {
-    res.send('Invalid file');
-    return;
-  }
-  const allowedExtensions = ['.docx', '.xlsx', '.pptx'];
-  const uploadFileName = req.file.filename;
-  const fileExtension = path.extname(uploadFileName).toLowerCase();
-  const stream = fs.createReadStream(req.file.path);
+  const file = req.file as Express.Multer.File;
+  const uploadFileName = file.filename;
 
-  const fileInfo = await fileTypeFromStream(stream);
-  if (!allowedExtensions.includes(fileExtension) || !fileInfo) {
-    res
-      .status(400)
-      .send(`Unsupported file type. Only ${allowedExtensions} are allowed`);
-    return;
-  }
-
-  const fileNameWithoutExt = path.parse(req.file.filename).name;
+  const fileNameWithoutExt = path.parse(file.filename).name;
 
   const pdfFileName = fileNameWithoutExt + '.pdf';
   try {
