@@ -3,6 +3,7 @@ import { fileTypeFromStream } from 'file-type';
 import fs from 'fs';
 import { NextFunction, Request, Response } from 'express';
 import { removeFiles } from '../utils/fileManager';
+import { ALLOWED_EXTENSION } from '../constant/allowedExtensions';
 
 export const documentValidation = async (
   req: Request,
@@ -14,18 +15,17 @@ export const documentValidation = async (
     return;
   }
 
-  const allowedExtensions = ['.docx', '.xlsx', '.pptx'];
   const uploadFileName = req.file.filename;
   const fileExtension = path.extname(uploadFileName).toLowerCase();
   const stream = fs.createReadStream(req.file.path);
-
   const fileInfo = await fileTypeFromStream(stream);
-  if (!allowedExtensions.includes(fileExtension) || !fileInfo) {
+  if (!ALLOWED_EXTENSION.includes(fileExtension) || !fileInfo) {
     res
       .status(400)
-      .send(`Unsupported file type. Only ${allowedExtensions} are allowed`);
+      .send(`Unsupported file type. Only ${ALLOWED_EXTENSION} are allowed`);
     removeFiles(uploadFileName);
     return;
   }
+
   next();
 };
