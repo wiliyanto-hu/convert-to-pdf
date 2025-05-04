@@ -6,7 +6,6 @@ export const execCommand = async (
   return new Promise((resolve, reject) => {
     exec(command, (error, stdout, stdin) => {
       if (error) {
-        console.log(error);
         reject({ success: false, message: error.message });
       }
       resolve({ success: true, message: stdout });
