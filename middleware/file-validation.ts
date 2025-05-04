@@ -20,14 +20,17 @@ export const documentValidation = async (
 
   const uploadFileName = req.file.filename;
   const fileExtension = path.extname(uploadFileName).toLowerCase();
+  if (!ALLOWED_EXTENSION.includes(fileExtension)) {
+    res
+      .status(400)
+      .send(`Unsupported file type. Only ${ALLOWED_EXTENSION} are allowed`);
+    removeFiles(uploadFileName);
+    return;
+  }
+
   const stream = fs.createReadStream(req.file.path);
   const fileInfo = await fileTypeFromStream(stream);
-  console.log(fileInfo);
-  if (
-    !ALLOWED_EXTENSION.includes(fileExtension) ||
-    !fileInfo ||
-    !ALLOWED_MIMETYPE.includes(fileInfo.mime)
-  ) {
+  if (!fileInfo || !ALLOWED_MIMETYPE.includes(fileInfo.mime)) {
     res
       .status(400)
       .send(`Unsupported file type. Only ${ALLOWED_EXTENSION} are allowed`);
