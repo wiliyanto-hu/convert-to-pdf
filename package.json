@@ -7,7 +7,7 @@
     "build": "rimraf ./dist && tsc",
     "predev": "npm run build",
     "dev": "concurrently \"tsc --watch\" \"nodemon dist/main.js\"",
-    "test": "jest"
+    "test": "rimraf ./dist && jest"
   },
   "keywords": [],
   "author": "",
