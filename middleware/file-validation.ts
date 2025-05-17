@@ -1,12 +1,12 @@
-import path from 'path';
-import { fileTypeFromStream } from 'file-type';
-import fs from 'fs';
-import { NextFunction, Request, Response } from 'express';
-import { removeFiles } from '../utils/fileManager';
+import path from "path";
+import { fileTypeFromStream } from "file-type";
+import fs from "fs";
+import { NextFunction, Request, Response } from "express";
+import { removeFiles } from "../utils/fileManager";
 import {
   ALLOWED_EXTENSION,
   ALLOWED_MIMETYPE,
-} from '../constant/allowedExtensions';
+} from "../constant/allowedExtensions";
 
 export const documentValidation = async (
   req: Request,
@@ -14,7 +14,7 @@ export const documentValidation = async (
   next: NextFunction
 ) => {
   if (!req.file) {
-    res.send('Invalid file');
+    res.status(400).send("Invalid file");
     return;
   }
 
